@@ -12,10 +12,52 @@ function nd(x,miu)//正态分布函数，x为自变量，miu为μ(平均数)，�
 	y=(1/(sigma*sqrt2Pie))*e**index;
 	return y;
 }
-function initialization()//加载后运行
+function newBuilding()
 {
-	document.getElementById('popNum').innerText=population;//初始化人口
-	document.getElementById('maxPop').innerText=popLimit;
+	for(var key in buildingDisplay)
+	{
+		if(buildingDisplay[key]==0)
+		{
+			var tempFlag=true;
+			for(var keyp in buildingsTable[key])
+			{
+				if(proDisplay[keyp]==0&&buildingsTable[key][keyp]>0)
+					{tempFlag=false;break;}
+			}
+			if(tempFlag)//创建新building
+			{
+				document.getElementById('building').insertBefore(document.createElement('br'),document.getElementById('buildingLast'));
+				buildingDisplay[key]=1;
+				var building=document.createElement('button');
+				building.setAttribute('class','normalButton');
+				building.setAttribute('id',key);
+				building.setAttribute('onclick','build(\''+key+'\')');
+				building.setAttribute('onmouseover','buildingMsOn(\''+key+'\')');
+				building.setAttribute('onmouseout','buildingMsOff(\''+key+'\')');
+				building.innerText=key;
+				document.getElementById('building').insertBefore(building,document.getElementById('buildingLast'));
+			}
+		}
+	}
+}
+function proVariationMonitor()
+{
+	
+	for(var key in proDisplay)//新的product被生产出 则在HTML中添加此product
+	{
+		if(production[key]>0&&proDisplay[key]==0)
+		{
+			proDisplay[key]=1;
+			var product=document.createElement('div');
+			product.setAttribute('id',key.replace(/Num/g, ''));
+			product.setAttribute('onmouseover','productMsOn('+key.replace(/product/g,'').replace(/Num/g,'')+')');
+			product.setAttribute('onmouseout','productMsOff('+key.replace(/product/g,'').replace(/Num/g,'')+')');
+			product.innerHTML=key.replace(/Num/g, '')+'：<div class="objectNum"><span id="'+key+'">0</span><span class="objectVariation">(0)</span></div>'
+			document.getElementById('production').insertBefore(product,document.getElementById('productLast'));
+			elementPro[key]=document.getElementById(key);
+		}
+	}
+	newBuilding();//更新可以新建的建筑
 }
 function produce()
 {
@@ -27,19 +69,46 @@ function produce()
 			for(const keyp in workersTable[keyw])//遍历所有种资源判断是否足够
 			{
 				if(production[keyp]+workersTable[keyw][keyp]<0)
-					{enoughProJudge=false;break;}
+					{enoughProJudge=false;actualWrkNum[keyw]=i-1;break;}
 			}
 			if(enoughProJudge)
 				for(const keyp in workersTable[keyw])
-					production[keyp]+=workersTable[keyw][keyp]*workerEfficient[keyw]/100;
+					actualWrkNum[keyw]=worker[keyw],production[keyp]+=workersTable[keyw][keyp]*workerEfficient[keyw]/100;
 		}
 	}//当初始worker!=0时可能会有bug?
+	for(var key in popNeed)
+	{
+		production[key]+=population*popNeed[key];//计算人口需求
+		production[key]=Math.max(0,production[key]);
+	}
 	for(var key in production)//同时遍历production
 	{
+		if(elementPro[key]=='xzx') continue;
 		elementPro[key].innerText=parseInt(production[key]);
 	}
-	//product1Num=Math.max(product1Num+count,0);
+	proVariationMonitor();
 	return produce;
+}
+function caclActualWrkNum()//用相同的方式计算出实际工作的工人
+{
+	var tempPro=Object.assign({}, production);
+	for(var key in actualWrkNum)
+		actualWrkNum[key]=worker[key];//初始化，为取最小值做准备
+	for(const keyw in workersTable)//遍历table的worker
+	{
+		for(var i=1;i<=worker[keyw];i++)//按每个worker判定是否资源足够
+		{
+			var enoughProJudge=true;
+			for(const keyp in workersTable[keyw])//遍历所有种资源判断是否足够
+			{
+				if(tempPro[keyp]+workersTable[keyw][keyp]<0)
+					{enoughProJudge=false;actualWrkNum[keyw]=Math.min(actualWrkNum[keyw],i-1);break;}
+			}
+			if(enoughProJudge)
+				for(const keyp in workersTable[keyw])
+					actualWrkNum[keyw]=worker[keyw],tempPro[keyp]+=workersTable[keyw][keyp]*workerEfficient[keyw]/100;
+		}
+	}
 }
 function popIncrement(differ)//计算人口增加量
 {//这玩意参数还是要调一调sigma变为3 differ=1时 x=-3.5 differ=8时 x=3.5 differ=15时x=10.5
@@ -72,6 +141,68 @@ function popIncrement(differ)//计算人口增加量
 	}
 	return increment;
 }
+function popDcrStopCondition(num)
+{
+	switch (num) 
+	{
+		case 3:
+			{
+				if(production['product1Num']>0)
+					return true;
+				else 
+					return false;
+				break;
+			}
+		
+	}
+}
+function popDecrement(num)//由于不同原因造成的人口减少
+{
+	clearInterval(popUpdating);//首先暂停人口增长
+	var buffDiv=document.createElement('div');//创建新buff 元素
+	buffDiv.setAttribute('id','popDcrBuff'+num);
+	buffDiv.innerHTML=popDecrementAttribute['dcr'+num]['name'];
+	document.getElementById("buffs").insertBefore(buffDiv,document.getElementById("buffLast"));
+	if(popDecrementAttribute['dcr'+num]['times']!=-1)
+	{
+		setTimeout(function(num){
+			document.getElementById('popDcrBuff'+num).remove();
+			popUpdating = setInterval(popUpdate, popSpeed); 
+		},popDecrementAttribute['dcr'+num]['times']*popSpeed,num);
+		var h=Math.floor(popDecrementAttribute['dcr'+num]['times']*popSpeed/1000/60/60),m=Math.floor(popDecrementAttribute['dcr'+num]['times']*popSpeed/1000/60%60),s=popDecrementAttribute['dcr'+num]['times']*popSpeed/1000%60;
+		buffDiv.innerHTML+=' <span class="timer">'+h+':'+m+':'+s+'</span>';
+		//每轮间隔一个popSpeed
+		totalPop=population;
+		for(var i=1;i<=popDecrementAttribute['dcr'+num]['times'];i++)//每轮减少一定数量/比例的人口
+		{
+			//alert(i);
+			if(popDecrementAttribute['dcr'+num]['cnt'][i]>=1)
+				setTimeout(function(num,i){
+					popSub(popDecrementAttribute['dcr'+num]['cnt'][i]);//差点忘了写了这个函数
+				},popSpeed*i,num,i);
+				
+			else if(popDecrementAttribute['dcr'+num]['cnt'][i]<1)
+				setTimeout(function(num,i){
+					popSub(Math.ceil(totalPop*popDecrementAttribute['dcr'+num]['cnt'][i]));
+				},popSpeed*i,num,i);
+		}
+	}
+	else if(popDecrementAttribute['dcr'+num]['times']==-1)//有条件解除型
+	{
+		var totalPop=population;
+		var buffDiv=document.createElement('div');//创建新buff 元素
+		buffDiv.setAttribute('id','popDcrBuff'+num);
+		buffDiv.innerHTML=popDecrementAttribute['dcr'+num]['name'];
+		window['popDcr'+num]=setInterval(function(num,totalPop){
+			if(popDcrStopCondition(num))
+				clearInterval(window['popDcr'+num]),document.getElementById('popDcrBuff'+num).remove(),popUpdating = setInterval(popUpdate, popSpeed);
+			if(popDecrementAttribute['dcr'+num]['cnt']>=1)
+				popSub(popDecrementAttribute['dcr'+num]['cnt']);
+			else if(popDecrementAttribute['dcr'+num]['cnt']<1)
+				popSub(Math.ceil(totalPop*popDecrementAttribute['dcr'+num]['cnt']));
+		},popSpeed,num,totalPop);
+	}
+}
 function popUpdate()
 {
 	var deltapop=0;//现在人口增长速度看起来可能很怪，不必惊慌只是函数算出来增加量是0
@@ -84,20 +215,96 @@ function popUpdate()
 	production['jobless']+=deltapop;
 	document.getElementById('popNum').innerText=population;
 	elementPro['jobless'].innerText=production['jobless'];
+	productionVariation();
 	return popUpdate;
 }
-function bldHouse()
+function bldResult(type,name)
 {
-	if(production['product2Num']>=5)
+	if(type==1)
 	{
 		production['product2Num']-=5;//建房，扣资源，加人口限制
 		elementPro['product2Num'].innerText=parseInt(production['product2Num']);
 		popLimit+=5;
 		document.getElementById('maxPop').innerText=popLimit;
+		document.getElementById('house').removeAttribute('disabled')
+	}
+	else if(type==2)
+	{
+		for (var key in buildingsTable[name])
+		production[key]-=buildingsTable[name][key];
+		for(var key in production)//建造完成后刷新资源显示
+		{
+			if(elementPro[key]=='xzx') continue;
+			elementPro[key].innerText=parseInt(production[key]);
+		}
+		building[name]=true;
+		var workerNum=0;
+		var workerName=name+'Num';
+		var workerDiv=document.createElement('div');
+		workerDiv.setAttribute('id',name+'s');
+		workerDiv.style.marginBottom='10px';
+		workerDiv.innerHTML='<span id="'+name+'Name" onmouseover="workerMsOn(\''+name+'\')" onmouseout="workerMsOff(\''+name+'\')">'+workerName+':  </span>'+//不要换行，有莫名其妙的bug。也不要改，调语法累死
+							'<span class="wrkAddSub" style="position: relative;float: right;"><button class="btnSubClass" onclick="WorkersAdd(-5,'+'\''+name+'\')"><span class="bigSub"></span></button><button class="btnSubClass" onclick="WorkersAdd(-1,'+'\''+name+'\')"><span class="sub"></span></button>\n<span id="'+name+'">'
+							+workerNum+'</span>\n<button class="btnAddClass" onclick="WorkersAdd(1,'+'\''+name+'\')"><span class="add"></span></button><button class="btnAddClass" onclick="WorkersAdd(5,'+'\''+name+'\')"><span class="bigAdd"></span></button></span>';
+		document.getElementById('worker').insertBefore(workerDiv,document.getElementById("workerLast"));/*在worker的最后
+		有一个workerLast标签，标记了worker的底线，新的worker从此前插入*/
+		elementWorkNum[name]=document.getElementById(name);
+	}
+	proVariationMonitor();
+}
+function bldHouse()//为什么点不了第二遍
+{
+	var enoughResources=true;
+	for (var key in buildingsTable['house'])//确认资源足够建造
+	{
+		if(buildingsTable['house'][key]>production[key])
+			{enoughResources=false;break;}
+	}
+	if(enoughResources&&(worker['builder']-workingBuilder)>=builderNeed['house'])
+	{
+		buildingMsOff('house');
+		workingBuilder+=builderNeed['house'];
+		document.getElementById('house').setAttribute('disabled','true');
+		var bldTimer=document.createElement('span');
+		bldTimer.setAttribute('class','bldTimer');
+		bldTimer.setAttribute('id','houseTimer');
+		bldTimer.style.marginLeft='5px';
+		bldTimer.style.color='black'
+		var h=Math.floor(buildTime['house']/60/60),m=Math.floor(buildTime['house']/60%60),s=buildTime['house']%60;
+		bldTimer.innerText=h+':'+m+':'+s;
+		document.getElementById('house').appendChild(bldTimer);
+	}
+}
+function build(name)
+{
+	var enoughResources=true;
+	if(!building[name])
+	{
+		for (var key in buildingsTable[name])//确认资源足够建造
+		{
+			if(buildingsTable[name][key]>production[key])
+				{enoughResources=false;break;}
+		}
+		if(enoughResources&&(worker['builder']-workingBuilder)>=builderNeed[name])
+		{
+			buildingMsOff(name);//disable后mouseout失效需要手动删除
+			workingBuilder+=builderNeed[name];
+			building[name]=true;
+			document.getElementById(name).setAttribute('disabled','true');
+			var bldTimer=document.createElement('span');
+			bldTimer.setAttribute('class','bldTimer');
+			bldTimer.setAttribute('id',name+'Timer');
+			bldTimer.style.marginLeft='5px';
+			bldTimer.style.color='black'
+			var h=Math.floor(buildTime[name]/60/60),m=Math.floor(buildTime[name]/60%60),s=buildTime[name]%60;
+			bldTimer.innerText=h+':'+m+':'+s;
+			document.getElementById(name).appendChild(bldTimer);
+		}
 	}
 }
 function productionVariation()//工人或buff  序号  工人数量
 {
+	caclActualWrkNum();
 	for(var key in produceResult)
 	{
 		produceResult[key]=0;//预处理，清零
@@ -107,14 +314,22 @@ function productionVariation()//工人或buff  序号  工人数量
 		for(var keyp in workersTable[keyw])
 		{
 			if(workersTable[keyw][keyp]>0)
-				produceResult[keyp]+=worker[keyw]*workersTable[keyw][keyp]*workerEfficient[keyw]/100;
+				produceResult[keyp]+=actualWrkNum[keyw]*workersTable[keyw][keyp]*workerEfficient[keyw]/100;
 			else if(workersTable[keyw][keyp]<0)
-			produceResult[keyp]+=worker[keyw]*workersTable[keyw][keyp];
+			produceResult[keyp]+=actualWrkNum[keyw]*workersTable[keyw][keyp];
 		}
+	}
+	for(var key in popNeed)
+	{
+		produceResult[key]+=popNeed[key]*population;
 	}
 	for(var key in produceResult)
 	{
-		document.getElementById(key).nextElementSibling.innerText='('+parseInt(produceResult[key])+')';//更新HTML
+		if(document.getElementById(key)==null) continue;
+		if(Number(produceResult[key])!=Math.round(produceResult[key]))//若为小数
+			document.getElementById(key).nextElementSibling.innerText='('+produceResult[key].toFixed(1)+')';//更新HTML
+		else if(Number(produceResult[key])==Math.round(produceResult[key]))//整数
+			document.getElementById(key).nextElementSibling.innerText='('+produceResult[key]+')';
 	}
 }
 function WorkersAdd(AddorSub,name)
@@ -152,50 +367,12 @@ function popSub(reduction)
 	production['jobless']-=Math.min(production['jobless'],reduction);//优先减无业者
 	reduction-=temp;//计算新的减少量
 	elementPro['jobless'].innerText=production['jobless'];
-	for(var i=lastWorker;i>=1;i--)
+	for(var key in worker)
 	{
-		workerName='worker'+i;//确定减少的工人
-		var temp=Math.min(worker[workerName],reduction);
-		worker[workerName]-=Math.min(worker[workerName],reduction);//减少该工人
+		var temp=Math.min(worker[key],reduction);
+		worker[key]-=Math.min(worker[key],reduction);//减少该工人
 		reduction-=temp;
-		elementWorkNum[workerName].innerText=worker[workerName];
+		elementWorkNum[key].innerText=worker[key];
 	}
+	productionVariation();
 }
-function build(name)
-{
-	var enoughResources=true;
-	if(!building[name])
-	{
-		for (var key in buildingsTable[name])//确认资源足够建造
-		{
-			if(buildingsTable[name][key]>production[key])
-				{enoughResources=false;break;}
-		}
-		if(enoughResources)//cursor写的有些看不懂，呜呜呜
-		{//创建新的worker元素
-			var num=bld2Num[name];
-			building[name]=true;
-			var workerNum=0;
-			var workerName=num2WkrName[name];
-			var workerDiv=document.createElement('div');
-			workerDiv.setAttribute('id','worker'+num+'s');
-			workerDiv.innerHTML=workerName+//不要换行，有莫名其妙的bug。也不要改，调语法累死
-								'： <button class="btnSubClass" onclick="WorkersAdd(-5,'+'\'worker'+num+'\')"><span class="sub"></span></button><button class="btnSubClass" onclick="WorkersAdd(-1,'+'\'worker'+num+'\')"><span class="sub"></span></button>\n<span id="worker'+num+'">'
-								+workerNum+'</span>\n<button class="btnAddClass" onclick="WorkersAdd(1,'+'\'worker'+num+'\')"><span class="add"></span></button><button class="btnAddClass" onclick="WorkersAdd(5,'+'\'worker'+num+'\')"><span class="add"></span></button>';
-			document.body.insertBefore(workerDiv,document.getElementById("workerLast"));/*在worker的最后
-			有一个workerLast标签，标记了worker的底线，新的worker从此前插入*/
-			elementWorkNum['worker'+num]=document.getElementById('worker'+num);
-			/*elementBtnAdd['worker'+num]=document.getElementById('btn'+num+'ProAdd')
-			elementBtnSub['worker'+num]=document.getElementById('btn'+num+'ProSub')//将id赋值给数组*/
-		}
-		if(enoughResources)//扣资源
-			for (var key in buildingsTable[name])
-				production[key]-=buildingsTable[name][key];
-		for(var key in production)//建造完成后刷新资源显示
-		{
-			elementPro[key].innerText=parseInt(production[key]);
-		}
-	}
-}
-setInterval(produce(),proSpeed);//定期执行production
-setInterval(popUpdate,popSpeed);

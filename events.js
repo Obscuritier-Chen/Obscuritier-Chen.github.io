@@ -1,4 +1,8 @@
-﻿function randomEvents()
+﻿function test()
+{
+	document.getElementById('all').setAttribute('class','');
+}
+function randomEvents()
 {
 	var prSum=0,coefficient,randomEventsNum;//randomEventsNum是随机事件编号
 	var randomEventsLength=Object.keys(randomEventsPr).length;//获取字典的大小
@@ -92,6 +96,7 @@ function performConfirmEvents(randomEventsNum)
 		default:
 			break;
 	}
+	proVariationMonitor();
 }
 function performSeletiveEvents(eventNum,btnNum)
 {
@@ -130,6 +135,7 @@ function performSeletiveEvents(eventNum,btnNum)
 			break;
 	}
 	document.getElementById('eventsPopup').remove();//移除popup
+	proVariationMonitor();
 }
 function performTradeEvents(eventNum,btnNum,goodsNum)//大胆一点，买buff/事件
 {
@@ -157,21 +163,28 @@ function performTradeEvents(eventNum,btnNum,goodsNum)//大胆一点，买buff/�
 		}
 		for(var key in production)//刷新production显示
 		{
+			if(elementPro[key]=='xzx') continue;
 			elementPro[key].innerText=parseInt(production[key]);
 		}
 	}
+	proVariationMonitor();
 }
 function eventsDisplay()
 {
 	if(document.getElementById('eventsPopup') == null)
 	{
-		var randomEventsNum=randomEvents();//产生时间编号
-		//randomEventsNum=5;
-		if(inevitableEvents.length!=0)
+		var randomEventsNum=0;//产生时间编号
+		if(inevitableEvents.length!=0)//必然事件
 		{
-			randomEventsNum=inevitableEvents.pop();//必然事件较随机事件概率更高
+			if(inevitableEventsDelay==0)
+				inevitableEventsDelay=parseInt(Math.random()*10%maxDelay),randomEventsNum=inevitableEvents.shift();
+			else if(inevitableEventsDelay>0)
+				inevitableEventsDelay--,randomEventsNum=randomEvents();
 		}
-		randomEventsNum=5;
+		else if(inevitableEvents.length==0)//随机事件
+		{
+			randomEventsNum=randomEvents();
+		}
 		if(randomEventsAttribute['event'+randomEventsNum]['type']==1)
 		{
 			performConfirmEvents(randomEventsNum);//confirm事件 的效果
@@ -184,7 +197,7 @@ function eventsDisplay()
     		popup.style.backgroundColor = 'white';
 			popup.style.padding = '200px';
 			popup.style.border = '1px solid black';
-			popup.style.zIndex = '9999';
+			popup.style.zIndex = '100';
 			// create a new div element for the text
 			var titleDiv = document.createElement('div');//标题
 			titleDiv.innerText = randomEventsAttribute['event'+randomEventsNum]['title'];
@@ -234,7 +247,7 @@ function eventsDisplay()
     		popup.style.backgroundColor = 'white';
 			popup.style.padding = '200px';
 			popup.style.border = '1px solid black';
-			popup.style.zIndex = '9999';
+			popup.style.zIndex = '100';
 			// create a new div element for the text
 			var titleDiv = document.createElement('div');//标题
 			titleDiv.innerText = randomEventsAttribute['event'+randomEventsNum]['title'];
@@ -276,7 +289,7 @@ function eventsDisplay()
 				button.style.background = 'none';
 				button.style.border = '1px solid black';
 				button.style.width = '280px';
-				button.setAttribute('onclick','performTradeEvents('+randomEventsNum+','+i+')');//设置按钮触发后的效果
+				button.setAttribute('onclick','performSeletiveEvents('+randomEventsNum+','+i+')');//设置按钮触发后的效果
 				buttonContainer.appendChild(button);
 				buttonContainer.appendChild(document.createElement('br'));
 			}
@@ -296,7 +309,7 @@ function eventsDisplay()
     		popup.style.backgroundColor = 'white';
 			popup.style.padding = '200px';
 			popup.style.border = '1px solid black';
-			popup.style.zIndex = '9999';
+			popup.style.zIndex = '100';
 			// create a new div element for the text
 			var titleDiv = document.createElement('div');//标题
 			titleDiv.innerText = randomEventsAttribute['event'+randomEventsNum]['title'];
@@ -389,42 +402,42 @@ function eventsDisplay()
 		}
 	}
 }
-setInterval(function(){   //所有class=timer的元素时间-1s
-    var timers = document.querySelectorAll('.timer');
-    for (var i = 0; i < timers.length; i++)
-	{
-    	var timer = timers[i];
-		var time = timer.textContent.split(':');
-		var hours = parseInt(time[0], 10);
-		var minutes = parseInt(time[1], 10);
-		var seconds = parseInt(time[2], 10);
-		if (seconds > 0)
-		{
-			seconds--;
-		} 
-		else 
-		{
-			if (minutes > 0)
-			{
-				minutes--;
-				seconds = 59;
-			}
-			else
-			{
-				if (hours > 0)
-				{
-					hours--;
-					minutes = 59;
-					seconds = 59;
-				}
-				else
-				{
-					timer.parentNode.removeChild(timer);
-					continue;
-				}
-			}
-		}
-		timer.textContent = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
-    }
-  }, 1000);
-//setInterval(eventsDisplay,eventSpeed);
+function infoPopup(num)
+{
+	var popup = document.createElement('div');
+	popup.style.width = '120px';
+	popup.style.border = '2px solid black';
+	popup.style.padding = '10px';
+	popup.style.overflowWrap = 'break-word';
+	popup.style.position = 'fixed';
+	popup.style.top = '50%';
+	popup.style.left = '50%';
+	popup.style.transform = 'translate(-50%, -50%)';
+
+	var title = document.createElement('div');
+	title.style.textAlign = 'center';
+	title.textContent = infoPopupAttribute['info'+num]['title'];
+	title.style.fontSize='20px';
+	popup.appendChild(title);
+
+	var content = document.createElement('div');
+	content.style.marginTop = '10px';
+	content.style.marginBottom='40px';
+	content.style.fontSize = '15px';
+	content.textContent = infoPopupAttribute['info'+num]['content'];
+	popup.appendChild(content);
+
+	var confirmButton = document.createElement('button');
+	confirmButton.style.position = 'absolute';
+	confirmButton.style.background = 'none'; // 删除按钮背景
+	confirmButton.style.right = '10px';
+	confirmButton.style.bottom = '10px';
+	confirmButton.innerText = "confirm";
+	confirmButton.style.border = '1px solid black';  // Change the button border to 1px
+	confirmButton.addEventListener('click', function() {
+		popup.remove(); // 点击关闭按钮时移除popup
+	});
+	popup.appendChild(confirmButton);
+
+	document.body.appendChild(popup);
+}

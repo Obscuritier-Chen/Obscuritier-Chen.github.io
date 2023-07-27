@@ -1,7 +1,10 @@
 //producing
 var popSpeed=1000,proSpeed=2000,eventSpeed=5000;
-var population=0,popLimit=20,lastWorker=3;
-var production={product1Num:10,product2Num:20,product3Num:20,jobless:0};
+var popUpdating;
+var population=0,popLimit=20,lastWorker=4;
+var production={product1Num:10,product2Num:20,product3Num:20,product4Num:0,jobless:0};
+var proDisplay={product1Num:1,product2Num:1,product3Num:1,product4Num:0};
+var popNeed={product1Num:-0.1,product2Num:0,product3Num:0,product4Num:0};
 var item={item1Num:0,item2Num:0};//物品
 var building={building1:false,building2:false};
 var elementBtnAdd={worker1:document.getElementById('btn1ProAdd'),
@@ -13,49 +16,103 @@ var elementBtnSub={worker1:document.getElementById('btn1ProSub'),
 var elementPro={product1Num:document.getElementById('product1Num'),//在字典里就获取element,但此时body未加载
 				product2Num:document.getElementById('product2Num'),
 				product3Num:document.getElementById('product3Num'),
+				product4Num:'xzx',
 			 	jobless:document.getElementById('jobless')};
-var worker={worker1:0,worker2:0,worker3:0};
-var workerEfficient={worker1:100,worker2:100,worker3:100};//产出加权
-var produceResult={product1Num:0,product2Num:0,product3Num:0}
-var elementWorkNum={worker1:document.getElementById('worker1'),
+var worker={worker1:0,worker2:0,worker3:0,builder:0};
+var actualWrkNum={worker1:0,worker2:0,worker3:0};
+var workingBuilder=0;
+var workerEfficient={builder:100,worker1:100,worker2:100,worker3:100};//产出加权
+var produceResult={product1Num:0,product2Num:0,product3Num:0,product4Num:0}
+var elementWorkNum={builder:document.getElementById('builder'),
+					worker1:document.getElementById('worker1'),
 				    worker2:'xzx',
 				    worker3:'xzx'};//有xzx的都是之后创建的元素，需要创建时赋值
-var bld2Num={building1:2,
-			 building2:3};
+var bld2Num={building1:'worker2',
+			 building2:'worker3'};
 var num2WkrName={building1:'worker2Num',
 			 	building2:'worker3Num'};
 var workersTable={// 注意此变量的一级下标worker1,worker2等等必须与worker完全相同
-	worker1:{//二级下标product1Num,product2Num等等必须与production完全相同
+	builder:{//二级下标product1Num,product2Num等等必须与production完全相同
+		product1Num:0,
+		product2Num:0,
+		product3Num:0,
+		product4Num:0
+	},
+	worker1:{
 		product1Num:5,
 		product2Num:0,
-		product3Num:0
+		product3Num:0,
+		product4Num:0
 	},
 	worker2:{
-		product1Num:0,
-		product2Num:2,
-		product3Num:0
+		product1Num:-1,
+		product2Num:-1,
+		product3Num:2,
+		product4Num:0
 	},
 	worker3:{
 		product1Num:0,
-		product2Num:-1,
-		product3Num:2
+		product2Num:2,
+		product3Num:0,
+		product4Num:1
 	}
 };
+var buildTime={house:60,building1:30,building2:120,buidling3:120};
+var builderNeed={house:1,building1:1,building2:2,building3:1};
+var buildingDisplay={house:1,building1:1,building2:1,building3:0}
 var buildingsTable={
-	building1:{
+	house:{
 		product1Num:0,
 		product2Num:5,
-		product3Num:0
+		product3Num:0,
+		product4Num:0
+	},
+	building1:{
+		product1Num:0,
+		product2Num:1,
+		product3Num:0,
+		product4Num:0
 	},
 	building2:{
 		product1Num:0,
 		product2Num:1,
-		product3Num:5
+		product3Num:5,
+		product4Num:0
+	},
+	building3:{
+		product1Num:0,
+		product2Num:1,
+		product3Num:0,
+		product4Num:5
 	}
 };
+var buildingText={
+	house: 'increasePopLimittestetstetstestetstest',
+	building1: 'forWorker2',
+	building2: 'forWorker3',
+	building3: 'forWorker4'
+}
+var popDecrementAttribute={
+	dcr1:{
+		name:'dcr1',
+		times:3,
+		cnt:[0,1,2,3]
+	},
+	dcr2:{
+		name:'dcr2',
+		times:5,
+		cnt:[0,0.3,0.3,0.2,0.1,0.1]//记得数组第一个下标为0
+	},
+	dcr3:{
+		name:'dcr3',
+		times:-1,
+		cnt:0.2
+	}
+}
 //---------------------------------------
 //events
 var inevitableEvents=[];//必然事件的堆栈
+var inevitableEventsDelay=0,maxDelay=4;
 var randomEventsPr={event1:10,	
                     event2:10,
                     event3:10};
@@ -165,7 +222,7 @@ var eventsBuffsEffect={//改变事件发生概率的buff的效果
 	{
 		eventNum:'event2',
 		effect:20,
-		duration:1
+		duration:5
 	}
 }
 var produceBuffsEffect={
@@ -177,8 +234,20 @@ var produceBuffsEffect={
 	},
 	buff2:
 	{
-		workerNum:'worker1',
+		workerNum:'worker3',
 		effect:-100,
 		duration:5
+	}
+}
+var infoPopupAttribute={
+	info1:
+	{
+		title:'alert',
+		content:'There is no food'
+	},
+	info2:
+	{
+		title:'test',
+		content:'testtesttesttesttesttesttesttesttesttesttesttesttesttest'
 	}
 }
