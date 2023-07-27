@@ -4,9 +4,13 @@
 <meta charset="utf-8">
 <title>余烬之辉</title>
     <style>
+		.hidden
+		{
+ 			display: none;
+		}
         .btnSubClass, .btnAddClass
 		{/*干掉按钮边框，按钮底色*/
-            /*border:none;*/
+            border:none;
             background-color:white;
 			font-size: 1.2em;
         }/*这俩没有本质区别,找时间合并*/
@@ -64,6 +68,33 @@
 		{
     		transform: rotate(-90deg);
 		}
+		.bigAdd
+		{
+    		width: 15px;
+    		height: 15px;
+    		margin: auto;
+    		position: relative;
+    		margin-left: 10px;
+		}
+		.bigAdd::before,
+		.bigAdd::after
+		{
+    		content: "";
+    		position: absolute;
+    		height: 16px;
+    		width: 2.5px;
+    		top: 3px;
+    		right: 3px;
+    		background-color: black;
+		}
+		.bigAdd::before
+		{
+    		transform: rotate(0deg);
+		}
+		.bigAdd::after
+		{
+    		transform: rotate(-90deg);
+		}
 		.sub
 		{
     		width: 15px;
@@ -91,6 +122,33 @@
 		{
     		transform: rotate(-90deg);
 		}/*垃圾CSS,但能用就行*/
+		.bigSub
+		{
+    		width: 15px;
+    		height: 15px;
+    		margin: auto;
+    		position: relative;
+    		margin-left: 10px;
+		}
+		.bigSub::before,
+		.bigSub::after
+		{
+    		content: "";
+    		position: absolute;
+    		height: 16px;
+    		width: 2.5px;
+    		top: 3px;
+    		right: 4px;
+    		background: black;
+		}
+		.bigSub::before
+		{
+    		transform: rotate(-90deg);
+		}
+		.bigSub::after
+		{
+    		transform: rotate(-90deg);
+		}/*垃圾CSS,但能用就行*/
 		.objectNum
 		{
 			float: right;
@@ -104,6 +162,7 @@
 		{
       		position: absolute;
 			margin-top: 20px;
+			min-width: '1px';
 			left:28px;
 			/*top: 100%;*/
 			background-color: black;
@@ -113,42 +172,85 @@
 			padding: 5px;
 			z-index: 999;/*覆盖优先级*/
     	}
+		.normalButton
+		{
+			position: relative;
+			color:black;
+			min-width: 120px;
+			height: 35px;
+			margin-bottom: 10px;
+			border: 1px solid black;
+			background: none;
+			text-align: left;
+			font-size: 1.07em;
+			display: inline-block;/*保证当按钮内元素增多时 宽度变大*/
+  			/*white-space: nowrap;*/
+		}
+		.columnTitle
+		{
+			position:absolute; 
+			top:-12px; font-size: 17px; 
+			background: white;
+		}
     </style>
 </head>
 <body onload="initialization()">
-	<div id="right" style="position:fixed; right:200px;"><!--将html分区，这是右侧栏-->
-		<div id="production" style="border:2px solid black; width:220px; padding:10px 10px;margin-bottom:1em;">
-			<div>population：<div class="objectNum" style="position:relative;"><span id="popNum" >0</span>/<span id="maxPop" style="float:right"></span></div></div>
-			<div>jobless：<div class="objectNum"><span id="jobless" ></span></div></div>
-			<div id="product1" onmouseover="productMsOn(1)" onmouseout="productMsOff(1)">product1：<div class="objectNum"><span id="product1Num"></span><span class="objectVariation">(0)</span></div></div>
-			<div id="product2" onmouseover="productMsOn(2)" onmouseout="productMsOff(2)">product2：<div class="objectNum"><span id="product2Num"></span><span class="objectVariation">(0)</span></div></div>
-			<div id="product3" onmouseover="productMsOn(3)" onmouseout="productMsOff(3)">product3：<div class="objectNum"><span id="product3Num"></span><span class="objectVariation">(0)</span></div></div>
+	<div id="all" class="hidden">
+		<div id="right" style="position: absolute; left: 70%; top:15%; transform: translate(-70%, -15%);"><!--将html分区，这是右侧栏-->
+			<div id="production" style="position:relative; border:2px solid black; width:220px; padding:10px 10px; padding-top:5px;margin-bottom:1em;">
+				<div class="columnTitle">聚居地: </div>
+				<div>population：<div class="objectNum" style="position:relative;"><span id="popNum" >0</span>/<span id="maxPop" style="float:right"></span></div></div>
+				<div>jobless：<div class="objectNum"><span id="jobless" ></span></div></div>
+				<div id="product1" onmouseover="productMsOn('product1')" onmouseout="productMsOff('product1')">product1：<div class="objectNum"><span id="product1Num"></span><span class="objectVariation">(0)</span></div></div>
+				<div id="product2" onmouseover="productMsOn('product2')" onmouseout="productMsOff('product2')">product2：<div class="objectNum"><span id="product2Num"></span><span class="objectVariation">(0)</span></div></div>
+				<div id="product3" onmouseover="productMsOn('product3')" onmouseout="productMsOff('product3')">product3：<div class="objectNum"><span id="product3Num"></span><span class="objectVariation">(0)</span></div></div>
+				<div id="productLast"></div>
+			</div>
+			<div id="buffs" style="position:relative; border:2px solid black; width:220px; padding:10px 10px;">
+				<div class="columnTitle">状态:  </div>
+				<div id="buffLast"></div>
+			</div>
 		</div>
-		<div id="buffs" style="border:2px solid black; width:220px; padding:10px 10px;">
-			<div id="buffLast"></div>
+		<div id="middle" style="position: absolute; left: 25%; top:15%; transform: translate(-25%, -15%); display: flex; flex-direction: row;">
+			<span id="worker" style="margin-right: 20px;">
+				<div style="font-size: 21px;">生产：</div>
+				<div id="workerInfo" style="float: right;"><span style="margin-right: 6px;">-5</span><span style="margin-right: 18px;">-1</span><span style="margin-right: 4px;">+1</span><span style="margin-right: 1px;">+5</span></div>
+				<br>
+				<div id="builders" style="margin-bottom: 10px;">
+					<span id="builderName" onmouseover="workerMsOn('builder')" onmouseout="workerMsOff('builder')" style="margin-right: 5px;">builderNum:  </span>
+					<span class="wrkAddSub" style="float: right;">
+						<button class="btnSubClass" onclick="WorkersAdd(-5,'builder')"><span class="bigSub"></span></button><button class="btnSubClass" onclick="WorkersAdd(-1,'builder')"><span class="sub"></span></button>
+						<span id="builder">0</span>
+						<button class="btnAddClass" onclick="WorkersAdd(1,'builder')"><span class="add"></span></button><button class="btnAddClass" onclick="WorkersAdd(5,'builder')"><span class="bigAdd"></span></button>
+					</span>
+				</div>
+				<div id="worker1s" style="margin-bottom: 10px;">
+					<span id="worker1Name" onmouseover="workerMsOn('worker1')" onmouseout="workerMsOff('worker1')" style="margin-right: 5px;">worker1Num:  </span>
+					<span class="wrkAddSub" style="float: right;">
+						<button class="btnSubClass" onclick="WorkersAdd(-5,'worker1')"><span class="bigSub"></span></button><button class="btnSubClass" onclick="WorkersAdd(-1,'worker1')"><span class="sub"></span></button>
+						<span id="worker1">0</span>
+						<button class="btnAddClass" onclick="WorkersAdd(1,'worker1')"><span class="add"></span></button><button class="btnAddClass" onclick="WorkersAdd(5,'worker1')"><span class="bigAdd"></span></button>
+					</span>
+				</div>
+				<div id="workerLast"></div>
+			</span>
+			<span id="building">
+				<div style="font-size: 21px; margin-bottom: 10px;">建造：</div>
+				<button class="normalButton" id="building1" onclick="build('building1')" onmouseover="buildingMsOn('building1')" onmouseout="buildingMsOff('building1')">building1</button>
+				<br>
+				<button class="normalButton" id="building2" onclick="build('building2')" onmouseover="buildingMsOn('building2')" onmouseout="buildingMsOff('building2')">building2</button>
+				<br>
+				<button class="normalButton" id="house" onclick="bldHouse()" onmouseover="buildingMsOn('house')" onmouseout="buildingMsOff('house')">buildhouse</button>
+				<div id="buildingLast"></div>
+			</span>
 		</div>
 	</div>
-	<div id="worker1s">
-		worker1Num：
-		<button class="btnSubClass" onclick="WorkersAdd(-5,'worker1')"><span class="sub"></span></button><button class="btnSubClass" onclick="WorkersAdd(-1,'worker1')"><span class="sub"></span></button>
-		<span id="worker1">0</span>
-		<button class="btnAddClass" onclick="WorkersAdd(1,'worker1')"><span class="add"></span></button><button class="btnAddClass" onclick="WorkersAdd(5,'worker1')"><span class="add"></span></button>
-	</div>
-	<div id="workerLast"></div>
-	<button id="btn1Bld" onclick="build('building1')">build1</button>
-	<br>
-	<button id="btn2Bld" onclick="build('building2')">build2</button>
-	<br>
-	<button onclick="bldHouse()">buildhouse</button>
-	<br>
-	<button onclick="popSub(11)">Subpop</button>
-	<br>
-	<button onclick="eventsDisplay()">event</button>
-	<br>
-	<button onclick="addEventsBuff(2)">buffTest</button>
+
 <script src="./variates.js"></script>
+<script src="./start.js"></script>
 <script src="./HTMLchange.js"></script>
 <script src="./producing.js"></script>
 <script src="./events.js"></script>
+<script src="./monitor.js"></script>
 </body>
 </html>
