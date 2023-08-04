@@ -212,18 +212,23 @@
 				<div class="columnTitle">聚居地: </div>
 				<div>population：<div class="objectNum" style="position:relative;"><span id="popNum" >0</span>/<span id="maxPop" style="float:right"></span></div></div>
 				<div>jobless：<div class="objectNum"><span id="jobless" ></span></div></div>
+				<div>researcher：
+					<div style="margin-left: 20px;">lv1：<div id="researcherLv1Num" class="objectNum">0</div></div>
+					<div style="margin-left: 20px;">lv2：<div id="researcherLv2Num" class="objectNum">0</div></div>
+					<div style="margin-left: 20px;">lv3：<div id="researcherLv3Num" class="objectNum">0</div></div>
+				</div>
 				<div id="product1" onmouseover="productMsOn('product1')" onmouseout="productMsOff('product1')">product1：<div class="objectNum"><span id="product1Num"></span><span class="objectVariation">(0)</span></div></div>
 				<div id="product2" onmouseover="productMsOn('product2')" onmouseout="productMsOff('product2')">product2：<div class="objectNum"><span id="product2Num"></span><span class="objectVariation">(0)</span></div></div>
 				<div id="product3" onmouseover="productMsOn('product3')" onmouseout="productMsOff('product3')">product3：<div class="objectNum"><span id="product3Num"></span><span class="objectVariation">(0)</span></div></div>
 				<div id="productLast"></div>
 			</div>
-			<div id="buffs" class="border">
-				<div class="columnTitle">状态:  </div>
-				<div id="buffLast"></div>
-			</div>
 			<div id="building" class="border">
 				<div class="columnTitle">建筑:  </div>
 				<div id="buildingLast"></div>
+			</div>
+			<div id="buffs" class="border">
+				<div class="columnTitle">状态:  </div>
+				<div id="buffLast"></div>
 			</div>
 		</div>
 		<div id="middle" style="position: absolute; left: 25%; top:15%; transform: translate(-25%, -15%);">
@@ -268,18 +273,18 @@
 					<div id="science" style="height: 45px;">
 						<span style="margin-right: 10px;">科技:</span>
 						<button id="research1" class="normalButton" onclick="research('research1')">research1</button>
-						<button style="border: 1px solid black; background-color:white;">分配</button>
+						<button id="scienceAllot" style="border: 1px solid black; background-color:white; position: relative;" onclick="createAllotPanel('science')">分配</button>
 					</div>
 					<div id="engineering" style="height: 45px;">
 						<span style="margin-right: 10px;">工程:</span>
 						<button id="research2" class="normalButton" onclick="research('research2')">research2</button>
 						<button id="research4" class="normalButton" onclick="research('research4')">research4</button>
-						<button style="border: 1px solid black; background-color:white;">分配</button>
+						<button id="engineeringAllot" style="border: 1px solid black; background-color:white; position: relative;" onclick="createAllotPanel('engineering')">分配</button>
 					</div>
 					<div id="sociology" style="height: 45px;">
 						<span style="margin-right: 10px;">行政:</span>
 						<button id="research3" class="normalButton" onclick="research('research3')">research3</button>
-						<button style="border: 1px solid black; background-color:white;">分配</button>
+						<button id="sociologyAllot" style="border: 1px solid black; background-color:white; position: relative;" onclick="createAllotPanel('sociology')">分配</button>
 					</div>	
 				</div>
 			</div>
