@@ -3,8 +3,7 @@ var popSpeed=1000,proSpeed=2000,eventSpeed=5000;
 var popUpdating;
 var population=1,popLimit=20;
 var production={product1Num:10,product2Num:20,product3Num:20,product4Num:0,jobless:0};
-var demographicComp={//人口组成
-	jobless:0,
+var specialResident={//特殊人口
 	researcherLv1:0,
 	researcherLv2:0,
 	researcherLv3:1

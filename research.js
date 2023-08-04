@@ -39,3 +39,43 @@ function research(name)
 		document.getElementById(name).appendChild(rsrTimer);
     }
 }
+function createAllotPanel(type)
+{
+    var rectangle=document.createElement('div');
+    rectangle.setAttribute('id',type+'AllotPanel');
+    rectangle.style.position='absolute';
+    rectangle.style.top='-2px';
+    rectangle.style.backgroundColor='white';
+    rectangle.style.border='1px solid black';
+    rectangle.style.display='inline-block';
+    rectangle.style.fontSize='16px';
+    rectangle.style.marginLeft='15px';
+    rectangle.style.padding='5px';
+    rectangle.style.zIndex=999;
+    document.getElementById(type+'Allot').appendChild(rectangle);
+
+    var researcherLv1=document.createElement('div');
+    researcherLv1.innerText='researcherLv1';
+    rectangle.appendChild(researcherLv1);
+    var researcherLv2=document.createElement('div');
+    researcherLv2.innerText='researcherLv2';
+    rectangle.appendChild(researcherLv2);
+    var researcherLv3=document.createElement('div');
+    researcherLv3.innerText='researcherLv3';
+    rectangle.appendChild(researcherLv3);
+
+    var confirmButton = document.createElement('button');
+    confirmButton.style.padding='5px';
+	confirmButton.style.background = 'none'; // 删除按钮背景
+    confirmButton.style.border='1px solid black';
+    confirmButton.style.float='right';
+	confirmButton.innerText = "confirm";
+    confirmButton.addEventListener('click', function() {
+        var tmpType=type;
+        document.getElementById(tmpType+'AllotPanel').remove();
+    });
+	//confirmButton.setAttribute('onclick','')
+    rectangle.appendChild(confirmButton);
+
+    
+}

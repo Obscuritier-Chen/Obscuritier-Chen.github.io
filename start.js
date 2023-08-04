@@ -2,6 +2,9 @@ function initialization()//加载后运行
 {
 	//document.querySelectorAll('body *').forEach(element => element.classList.add('hidden'));
 	document.getElementById('popNum').innerText=population;//初始化人口
+    document.getElementById('researcherLv1Num').innerText=specialResident['researcherLv1'];
+    document.getElementById('researcherLv2Num').innerText=specialResident['researcherLv2'];
+    document.getElementById('researcherLv3Num').innerText=specialResident['researcherLv3'];
 	document.getElementById('maxPop').innerText=popLimit;
 	inevitableEventsDelay=parseInt(Math.random()*10%maxDelay);
     var newGameBtn = document.createElement('button');

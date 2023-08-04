@@ -217,9 +217,9 @@ function popUpdate()
 		deltapop=Math.min(popLimit-population,deltapop);//保证人口数量不超过人口限制
 	}
 	population+=deltapop;//计算人口量结果
-	demographicComp['jobless']+=deltapop;
+	production['jobless']+=deltapop;
 	document.getElementById('popNum').innerText=population;
-	elementPro['jobless'].innerText=demographicComp['jobless'];
+	elementPro['jobless'].innerText=production['jobless'];
 	productionVariation();
 	return popUpdate;
 }
@@ -266,24 +266,24 @@ function WorkersAdd(AddorSub,name)
 	//工人+1 +5 -1 -5的情况
 	if(AddorSub==1)
 	{
-		if(demographicComp['jobless']>0)
-			worker[name]++,demographicComp['jobless']--;
+		if(production['jobless']>0)
+			worker[name]++,production['jobless']--;
 	}
 	else if(AddorSub==5)
 	{
-		worker[name]+=Math.min(demographicComp['jobless'],5),demographicComp['jobless']-=Math.min(demographicComp['jobless'],5);
+		worker[name]+=Math.min(production['jobless'],5),production['jobless']-=Math.min(production['jobless'],5);
 	}
 	else if(AddorSub==-1)
 	{
 		if(worker[name]>0)
-			worker[name]--,demographicComp['jobless']++;
+			worker[name]--,production['jobless']++;
 	}
 	else if(AddorSub==-5)
 	{
-		demographicComp['jobless']+=Math.min(worker[name],5),worker[name]-=Math.min(worker[name],5);
+		production['jobless']+=Math.min(worker[name],5),worker[name]-=Math.min(worker[name],5);
 	}
 	productionVariation();//更新生产量显示
-	elementPro['jobless'].innerText=demographicComp['jobless'];
+	elementPro['jobless'].innerText=production['jobless'];
 	worker[name]=Math.max(worker[name],0);//似乎没用
 	elementWorkNum[name].innerText=worker[name];
 }
@@ -292,16 +292,23 @@ function popSub(reduction)
 	reduction=Math.min(population,reduction);
 	population-=reduction;//减少总人口
 	document.getElementById('popNum').innerText=population;
-	var temp=Math.min(demographicComp['jobless'],reduction);
-	demographicComp['jobless']-=Math.min(demographicComp['jobless'],reduction);//优先减无业者
+	var temp=Math.min(production['jobless'],reduction);
+	production['jobless']-=Math.min(production['jobless'],reduction);//优先减无业者
 	reduction-=temp;//计算新的减少量
-	elementPro['jobless'].innerText=demographicComp['jobless'];
-	for(var key in worker)
+	elementPro['jobless'].innerText=production['jobless'];
+	for(var key in worker)//减少工人
 	{
 		var temp=Math.min(worker[key],reduction);
 		worker[key]-=Math.min(worker[key],reduction);//减少该工人
 		reduction-=temp;
 		elementWorkNum[key].innerText=worker[key];
+	}
+	for(var key in specialResident)//特殊人口优先级最低
+	{
+		var temp=Math.min(specialResident[key],reduction);
+		specialResident[key]-=Math.min(specialResident[key],reduction);
+		reduction-=temp;
+		document.getElementById(key+'Num').innerText=specialResident[key];
 	}
 	productionVariation();
 }
