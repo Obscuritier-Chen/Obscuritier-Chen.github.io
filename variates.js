@@ -1,12 +1,17 @@
 //producing
 var popSpeed=1000,proSpeed=2000,eventSpeed=5000;
 var popUpdating;
-var population=0,popLimit=20,lastWorker=4;
+var population=1,popLimit=20;
 var production={product1Num:10,product2Num:20,product3Num:20,product4Num:0,jobless:0};
+var demographicComp={//人口组成
+	jobless:0,
+	researcherLv1:0,
+	researcherLv2:0,
+	researcherLv3:1
+}
 var proDisplay={product1Num:1,product2Num:1,product3Num:1,product4Num:0};
 var popNeed={product1Num:-0.1,product2Num:0,product3Num:0,product4Num:0};
 var item={item1Num:0,item2Num:0};//物品
-var building={building1:false,building2:false};
 var elementBtnAdd={worker1:document.getElementById('btn1ProAdd'),
 				   worker2:'xzx',
 				   worker3:'xzx'};
@@ -57,40 +62,94 @@ var workersTable={// 注意此变量的一级下标worker1,worker2等等必须�
 		product4Num:1
 	}
 };
-var buildTime={house:60,building1:30,building2:120,buidling3:120};
-var builderNeed={house:1,building1:1,building2:2,building3:1};
-var buildingDisplay={house:1,building1:1,building2:1,building3:0}
-var buildingsTable={
+var buildingAttribute={
 	house:{
-		product1Num:0,
-		product2Num:5,
-		product3Num:0,
-		product4Num:0
+		type:1,
+		display:1,
+		num:0,
+		need:{
+			product1Num:0,
+			product2Num:5,
+			product3Num:0,
+			product4Num:0
+			},
+		builderNeed:1,
+		limit:-1,
+		time:60,
+		text:'increasePopLimittestetstetstestetstest',
+		consume:null,
+		condition:0
 	},
 	building1:{
-		product1Num:0,
-		product2Num:1,
-		product3Num:0,
-		product4Num:0
+		type:2,
+		display:1,
+		num:0,
+		need:{
+			product1Num:0,
+			product2Num:1,
+			product3Num:0,
+			product4Num:0
+			},
+		builderNeed:1,
+		limit:1,
+		time:30,
+		text:'forWorker2',
+		consume:null,
+		condition:0
 	},
 	building2:{
-		product1Num:0,
-		product2Num:1,
-		product3Num:5,
-		product4Num:0
+		type:2,
+		display:1,
+		num:0,
+		need:{
+			product1Num:0,
+			product2Num:1,
+			product3Num:0,
+			product4Num:0
+			},
+		builderNeed:1,
+		limit:1,
+		time:30,
+		text:'forWorker3',
+		consume:{
+			product2Num:-1
+		},
+		condition:0
 	},
 	building3:{
-		product1Num:0,
-		product2Num:1,
-		product3Num:0,
-		product4Num:5
+		type:2,
+		display:0,
+		num:0,
+		need:{
+			product1Num:0,
+			product2Num:0,
+			product3Num:0,
+			product4Num:1
+			},
+		builderNeed:1,
+		limit:1,
+		time:30,
+		text:'forWorker4',
+		consume:null,
+		condition:0
+	},
+	building4:{
+		type:3,
+		display:1,
+		num:0,
+		need:{
+			product1Num:0,
+			product2Num:1,
+			product3Num:0,
+			product4Num:0
+			},
+		builderNeed:1,
+		limit:1,
+		time:30,
+		text:'test',
+		consume:null,
+		condition:0
 	}
-};
-var buildingText={
-	house: 'increasePopLimittestetstetstestetstest',
-	building1: 'forWorker2',
-	building2: 'forWorker3',
-	building3: 'forWorker4'
 }
 var popDecrementAttribute={
 	dcr1:{
@@ -109,7 +168,7 @@ var popDecrementAttribute={
 		cnt:0.2
 	}
 }
-//---------------------------------------
+//------------------------------------------------------------------------
 //events
 var inevitableEvents=[];//必然事件的堆栈
 var inevitableEventsDelay=0,maxDelay=4;
@@ -247,7 +306,76 @@ var infoPopupAttribute={
 	},
 	info2:
 	{
-		title:'test',
-		content:'testtesttesttesttesttesttesttesttesttesttesttesttesttest'
+		title:'alert',
+		content:'product2 is not enough'
+	}
+}
+//------------------------------------------------------------------------
+//research
+var researchProject={
+	research1:
+	{
+		type:'science',
+		time:10,
+		display:1,
+		text:'research1',
+		consume:null
+	},
+	research2:
+	{
+		type:'engineering',
+		time:10,
+		display:1,
+		text:'research2',
+		consume:
+		{
+			product2Num:5
+		}
+	},
+	research3:
+	{
+		type:'sociology',
+		time:10,
+		display:1,
+		text:'research2',
+		consume:
+		{
+			product2Num:5
+		}
+	},
+	research4:
+	{
+		type:'engineering',
+		time:20,
+		display:1,
+		text:'research2',
+		consume:null
+	}
+}
+var scienceAttribute={
+	condition:0,
+	researcher:
+	{
+		level1:0,
+		level2:0,
+		level3:0,
+	}
+}
+var engineeringAttribute={
+	condition:0,
+	researcher:
+	{
+		level1:0,
+		level2:0,
+		level3:0,
+	}
+}
+var sociologyAttribute={
+	condition:0,
+	researcher:
+	{
+		level1:0,
+		level2:0,
+		level3:0,
 	}
 }

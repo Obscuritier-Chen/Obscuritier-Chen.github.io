@@ -1,8 +1,4 @@
-﻿function test()
-{
-	document.getElementById('all').setAttribute('class','');
-}
-function randomEvents()
+﻿function randomEvents()
 {
 	var prSum=0,coefficient,randomEventsNum;//randomEventsNum是随机事件编号
 	var randomEventsLength=Object.keys(randomEventsPr).length;//获取字典的大小
@@ -96,6 +92,7 @@ function performConfirmEvents(randomEventsNum)
 		default:
 			break;
 	}
+	productionVariation();
 	proVariationMonitor();
 }
 function performSeletiveEvents(eventNum,btnNum)
@@ -135,6 +132,7 @@ function performSeletiveEvents(eventNum,btnNum)
 			break;
 	}
 	document.getElementById('eventsPopup').remove();//移除popup
+	productionVariation();
 	proVariationMonitor();
 }
 function performTradeEvents(eventNum,btnNum,goodsNum)//大胆一点，买buff/事件
@@ -167,6 +165,7 @@ function performTradeEvents(eventNum,btnNum,goodsNum)//大胆一点，买buff/�
 			elementPro[key].innerText=parseInt(production[key]);
 		}
 	}
+	productionVariation();
 	proVariationMonitor();
 }
 function eventsDisplay()
@@ -401,43 +400,4 @@ function eventsDisplay()
 			document.body.appendChild(popup);
 		}
 	}
-}
-function infoPopup(num)
-{
-	var popup = document.createElement('div');
-	popup.style.width = '120px';
-	popup.style.border = '2px solid black';
-	popup.style.padding = '10px';
-	popup.style.overflowWrap = 'break-word';
-	popup.style.position = 'fixed';
-	popup.style.top = '50%';
-	popup.style.left = '50%';
-	popup.style.transform = 'translate(-50%, -50%)';
-
-	var title = document.createElement('div');
-	title.style.textAlign = 'center';
-	title.textContent = infoPopupAttribute['info'+num]['title'];
-	title.style.fontSize='20px';
-	popup.appendChild(title);
-
-	var content = document.createElement('div');
-	content.style.marginTop = '10px';
-	content.style.marginBottom='40px';
-	content.style.fontSize = '15px';
-	content.textContent = infoPopupAttribute['info'+num]['content'];
-	popup.appendChild(content);
-
-	var confirmButton = document.createElement('button');
-	confirmButton.style.position = 'absolute';
-	confirmButton.style.background = 'none'; // 删除按钮背景
-	confirmButton.style.right = '10px';
-	confirmButton.style.bottom = '10px';
-	confirmButton.innerText = "confirm";
-	confirmButton.style.border = '1px solid black';  // Change the button border to 1px
-	confirmButton.addEventListener('click', function() {
-		popup.remove(); // 点击关闭按钮时移除popup
-	});
-	popup.appendChild(confirmButton);
-
-	document.body.appendChild(popup);
 }

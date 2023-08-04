@@ -17,7 +17,7 @@ function initialization()//加载后运行
     importFileBtn.style.display = 'block';
     importFileBtn.style.marginTop = '20px';
     var container = document.createElement('container');
-    container.setAttribute('id','startGameBtn')
+    container.setAttribute('id','startGameBtn');
     container.style.position='absolute'; 
     container.style.left= '50%';
     container.style.top='50%';
