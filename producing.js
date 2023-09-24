@@ -33,7 +33,7 @@ function proVariationMonitor()
 	{
 		if(document.getElementById('popDcrBuff3')==null)
         {
-            infoPopup(1);//在HTML中提醒
+            infoPopup('info1');//在HTML中提醒
             popDecrement(3);
         }
 	}
@@ -57,7 +57,8 @@ function produce()
 			}
 			if(enoughProJudge)
 			{
-				buildingAttribute[key]['condition']=1;
+				if(buildingAttribute[key]['condition']==0)
+					buildingResume(key);
 				for(var keyp in buildingAttribute[key]['consume'])
 					production[keyp]+=buildingAttribute[key]['consume'][keyp];
 			}
@@ -287,6 +288,27 @@ function WorkersAdd(AddorSub,name)
 	worker[name]=Math.max(worker[name],0);//似乎没用
 	elementWorkNum[name].innerText=worker[name];
 }
+function researcherSub(name,num)//处理各岗位researcher的sub
+{
+	var temp=Math.min(freeResearcher[name],num);
+	freeResearcher[name]-=temp;
+	num-=temp;
+	var temp=Math.min(scienceAttribute[name],num);
+	scienceAttribute[name]-=temp;
+	num-=temp;
+	if(document.getElementById('science'+name.replace(/researcher/gi, "Researcher")+'Num')!=null)//若分配面板未关 更新其HTML
+		document.getElementById('science'+name.replace(/researcher/gi, "Researcher")+'Num').innerText=scienceAttribute[name];
+	var temp=Math.min(engineeringAttribute[name],num);
+	engineeringAttribute[name]-=temp;
+	num-=temp;
+	if(document.getElementById('engineering'+name.replace(/researcher/gi, "Researcher")+'Num')!=null)
+		document.getElementById('engineering'+name.replace(/researcher/gi, "Researcher")+'Num').innerText=engineeringAttribute[name];
+	var temp=Math.min(sociologyAttribute[name],num);
+	sociologyAttribute[name]-=temp;
+	if(document.getElementById('sociology'+name.replace(/researcher/gi, "Researcher")+'Num')!=null)
+		document.getElementById('sociology'+name.replace(/researcher/gi, "Researcher")+'Num').innerText=sociologyAttribute[name];
+	num-=temp;
+}
 function popSub(reduction)
 {
 	reduction=Math.min(population,reduction);
@@ -307,6 +329,8 @@ function popSub(reduction)
 	{
 		var temp=Math.min(specialResident[key],reduction);
 		specialResident[key]-=Math.min(specialResident[key],reduction);
+		if(key=='researcherLv1'||key=='researcherLv2'||key=='researcherLv3')
+			researcherSub(key,temp);
 		reduction-=temp;
 		document.getElementById(key+'Num').innerText=specialResident[key];
 	}

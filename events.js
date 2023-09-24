@@ -29,55 +29,6 @@
 	}
 	return randomEventsNum;
 }
-function addEventsBuff(num)
-{
-	if(!document.getElementById('eventsBuff'+num))
-	{
-		eventsBuff[eventsBuffsEffect['buff'+num]['eventNum']]+=eventsBuffsEffect['buff'+num]['effect'];
-		var buffDiv=document.createElement('div');//创建新buff 元素
-		buffDiv.setAttribute('id','eventsBuff'+num);
-		buffDiv.innerHTML=eventsBuffsContent['buff'+num];
-		if(eventsBuffsEffect['buff'+num]['duration']!=-1)
-		{
-			var h=Math.floor(eventsBuffsEffect['buff'+num]['duration']/60),m=eventsBuffsEffect['buff'+num]['duration']%60;
-			buffDiv.innerHTML+=' <span class="timer">'+h+':'+m+':0</span>';
-		}
-		document.getElementById("buffs").insertBefore(buffDiv,document.getElementById("buffLast"));/*insertbefore的. 前需要是buff
-		last的上一级，假如bufflast被嵌套了*/
-		if(eventsBuffsEffect['buff'+num]['duration']!=-1)
-		{
-			setTimeout(function(num){document.getElementById('eventsBuff'+num).remove();
-									 eventsBuff[eventsBuffsEffect['buff'+num]['eventNum']]-=eventsBuffsEffect['buff'+num]['effect'];}
-			,eventsBuffsEffect['buff'+num]['duration']*1000*60,num);
-			//写这个破 时间结束就删除的玩意花了我一个晚上 
-			//function里不能直接传参数会被立即执行 可以在setTimeout最后写上参数
-		}
-	}
-}
-function addProduceBuff(num)
-{
-	if(!document.getElementById('produceBuff'+num))
-	{
-		workerEfficient[produceBuffsEffect['buff'+num]['workerNum']]+=produceBuffsEffect['buff'+num]['effect'];
-		var buffDiv=document.createElement('div');//创建新buff 元素
-		buffDiv.setAttribute('id','produceBuff'+num);
-		buffDiv.innerHTML=produceBuffsContent['buff'+num];
-		if(produceBuffsEffect['buff'+num]['duration']!=-1)
-		{
-			var h=Math.floor(produceBuffsEffect['buff'+num]['duration']/60),m=produceBuffsEffect['buff'+num]['duration']%60;
-			buffDiv.innerHTML+=' <span class="timer">'+h+':'+m+':0</span>';
-		}
-		document.getElementById("buffs").insertBefore(buffDiv,document.getElementById("buffLast"));/*insertbefore的. 前需要是buff
-		last的上一级，假如bufflast被嵌套了*/
-		if(produceBuffsEffect['buff'+num]['duration']!=-1)
-		{
-			setTimeout(function(num){document.getElementById('produceBuff'+num).remove();
-									workerEfficient[produceBuffsEffect['buff'+num]['workerNum']]-=produceBuffsEffect['buff'+num]['effect'];}
-			,produceBuffsEffect['buff'+num]['duration']*1000*60,num);
-		}
-		productionVariation('buff',null,null);//因为workerEfficient已经更新，仅更新HTML
-	}
-}
 function performConfirmEvents(randomEventsNum)
 {
 	switch (randomEventsNum)//根据时间编号产生事件效果
